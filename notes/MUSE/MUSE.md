@@ -91,19 +91,19 @@ $$
 
 $$
 h_i^{(l)}=\mathrm{Aggregate}^{(l)}
-\left(
+(
 h_i^{(l-1)},
-\left\{
+\{
 \mathrm{Message}^{(l)}
 (h_j^{(l-1)},h_i^{(l-1)},e_{ji}^{(l-1)})
-\right\}_{j\in\mathcal N(i)}
-\right).
+\}_{j\in N(i)}
+).
 $$
 
 图上的多跳传播使患者能够经由共享模态节点间接交换信息，也使模态节点聚合不同患者对该模态的观测。最终取得患者节点矩阵
 
 $$
-Z=\mathrm{GNN}(G)\in\mathbb R^{N\times d}.
+Z=\mathrm{GNN}(G)\in R^{N\times d}.
 $$
 
 ### 3. 结构级数据增强
@@ -121,7 +121,7 @@ $$
 无监督对比损失将同一患者在两种模态视图下的表示作为正样本：
 
 $$
-\mathcal L_{\text{Unsup}}(Z,Z')
+L_{\mathrm{Unsup}}(Z,Z')
 =-\sum_{p=1}^{N}
 \log
 \frac{\exp(s(z_p,z'_p)/\tau)}
@@ -133,7 +133,7 @@ $$
 监督对比损失仅选择标签可用的患者，把同标签患者作为正对、异标签患者作为负对：
 
 $$
-\mathcal L_{\text{Sup}}(Z,Y,L).
+L_{\mathrm{Sup}}(Z,Y,L).
 $$
 
 其作用是让模型不只学习模态无关特征，还聚焦于 label-decisive features。实现上，监督对比损失作用于患者表示经过 projection layer 后的张量，而分类损失直接作用于原始患者表示，避免两个目标完全重复。
@@ -147,18 +147,18 @@ $$
 并只对有标签患者计算交叉熵：
 
 $$
-\mathcal L_{\text{CE}}
-=\sum_{p=1}^{N}\mathbf 1(L[p]=1)
+L_{\mathrm{CE}}
+=\sum_{p=1}^{N}1(L[p]=1)
 \mathrm{CE}(\hat y_p,y_p).
 $$
 
 总目标是三项损失的加权和：
 
 $$
-\mathcal L
-=\lambda_1\mathcal L_{\text{Unsup}}
-+\lambda_2\mathcal L_{\text{Sup}}
-+\lambda_3\mathcal L_{\text{CE}}.
+L
+=\lambda_1 L_{\mathrm{Unsup}}
++\lambda_2 L_{\mathrm{Sup}}
++\lambda_3 L_{\mathrm{CE}}.
 $$
 
 ### 5. MUSE 与 MUSE+
