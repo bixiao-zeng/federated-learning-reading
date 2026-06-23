@@ -60,28 +60,28 @@ MUSE 研究比“缺失模态”更贴近临床现实的联合问题：患者可
 
 ### 1. 患者—模态二部图
 
-给定患者 \(p\) 的多模态输入
+给定患者 $p$ 的多模态输入
 
-\[
+$$
 X^{(p)}=(x_1^{(p)},x_2^{(p)},\ldots,x_M^{(p)})
-\]
+$$
 
-以及模态可用矩阵 \(A\in\{0,1\}^{N\times M}\)，MUSE 构造无向二部图
+以及模态可用矩阵 $A\in\{0,1\}^{N\times M}$，MUSE 构造无向二部图
 
-\[
+$$
 G=(V,E),\qquad V=V_P\cup V_M
-\]
+$$
 
 其中：
 
-- \(V_P=\{u_1,\ldots,u_N\}\) 是患者节点；
-- \(V_M=\{v_1,\ldots,v_M\}\) 是模态节点；
-- 若患者 \(p\) 拥有模态 \(m\)，即 \(A[p,m]=1\)，则建立边 \(e_{u_pv_m}\)；
+- $V_P=\{u_1,\ldots,u_N\}$ 是患者节点；
+- $V_M=\{v_1,\ldots,v_M\}$ 是模态节点；
+- 若患者 $p$ 拥有模态 $m$，即 $A[p,m]=1$，则建立边 $e_{u_pv_m}$；
 - 模态并不是患者节点的普通输入，而是边属性：
 
-\[
+$$
 e_{u_pv_m}^{(0)}=\operatorname{Encoder}_m(x_m^{(p)}).
-\]
+$$
 
 模态节点初始化为对应模态的 one-hot 向量，患者节点初始化为全一向量。这样，模态缺失直接表现为边不存在，不需要补零或为每种模态组合建立独立网络。
 
@@ -89,7 +89,7 @@ e_{u_pv_m}^{(0)}=\operatorname{Encoder}_m(x_m^{(p)}).
 
 模型使用两层、支持 edge attributes 的 GraphSAGE。一般形式为：
 
-\[
+$$
 h_i^{(l)}=\operatorname{Aggregate}^{(l)}
 \left(
 h_i^{(l-1)},
@@ -98,21 +98,21 @@ h_i^{(l-1)},
 (h_j^{(l-1)},h_i^{(l-1)},e_{ji}^{(l-1)})
 \right\}_{j\in\mathcal N(i)}
 \right).
-\]
+$$
 
 图上的多跳传播使患者能够经由共享模态节点间接交换信息，也使模态节点聚合不同患者对该模态的观测。最终取得患者节点矩阵
 
-\[
+$$
 Z=\operatorname{GNN}(G)\in\mathbb R^{N\times d}.
-\]
+$$
 
 ### 3. 结构级数据增强
 
-从原图 \(G\) 随机删除部分患者—模态边，得到增强图 \(G'\)。两张图表示同一批患者，但模态可用集合不同：
+从原图 $G$ 随机删除部分患者—模态边，得到增强图 $G'$。两张图表示同一批患者，但模态可用集合不同：
 
-\[
+$$
 Z'=\operatorname{GNN}(G').
-\]
+$$
 
 原图和增强图共享同一个 GNN，即 Siamese encoder。edge dropout 与 feature dropout 的差别很重要：前者删除完整模态关系，后者只破坏模态内部特征，不能真实模拟整模态不可得。
 
@@ -120,46 +120,46 @@ Z'=\operatorname{GNN}(G').
 
 无监督对比损失将同一患者在两种模态视图下的表示作为正样本：
 
-\[
+$$
 \mathcal L_{\text{Unsup}}(Z,Z')
 =-\sum_{p=1}^{N}
 \log
 \frac{\exp(s(z_p,z'_p)/\tau)}
 {\sum_{q=1}^{N}\exp(s(z_p,z'_q)/\tau)}.
-\]
+$$
 
 它要求表示对模态组合变化保持一致，只使用“同一患者”这一自监督信号，因此无标签患者也能参与。
 
 监督对比损失仅选择标签可用的患者，把同标签患者作为正对、异标签患者作为负对：
 
-\[
+$$
 \mathcal L_{\text{Sup}}(Z,Y,L).
-\]
+$$
 
 其作用是让模型不只学习模态无关特征，还聚焦于 label-decisive features。实现上，监督对比损失作用于患者表示经过 projection layer 后的张量，而分类损失直接作用于原始患者表示，避免两个目标完全重复。
 
 分类头为：
 
-\[
+$$
 \hat Y=\operatorname{MLP}(Z),
-\]
+$$
 
 并只对有标签患者计算交叉熵：
 
-\[
+$$
 \mathcal L_{\text{CE}}
 =\sum_{p=1}^{N}\mathbf 1(L[p]=1)
 \operatorname{CE}(\hat y_p,y_p).
-\]
+$$
 
 总目标是三项损失的加权和：
 
-\[
+$$
 \mathcal L
 =\lambda_1\mathcal L_{\text{Unsup}}
 +\lambda_2\mathcal L_{\text{Sup}}
 +\lambda_3\mathcal L_{\text{CE}}.
-\]
+$$
 
 ### 5. MUSE 与 MUSE+
 
@@ -171,7 +171,7 @@ Z'=\operatorname{GNN}(G').
 
 - GNN：2-layer GraphSAGE with edge attributes。
 - Edge dropout rate：15%。
-- Temperature \(\tau=0.05\)。
+- Temperature $\tau=0.05$。
 - 数据划分：70% / 10% / 20% train / validation / test。
 - 训练：100 epochs，以验证集指标选择最佳模型。
 - 统计：对测试集 bootstrap 1000 次，报告均值和标准差；用 independent two-sample t-test 检验 MUSE 对最佳基线的提升。
@@ -223,8 +223,8 @@ ADNI 样本较小，bootstrap 标准差普遍更大，但方法排序与 ICU 场
 
 ### 缺失率分析
 
-- 模态随机缺失率：\(\{0.1,0.2,0.3,0.5,0.7\}\)。
-- 标签随机缺失率：\(\{0,0.1,0.2,0.3,0.4\}\)。
+- 模态随机缺失率：$\{0.1,0.2,0.3,0.5,0.7\}$。
+- 标签随机缺失率：$\{0,0.1,0.2,0.3,0.4\}$。
 - 任务：MIMIC-IV mortality。
 - 结果：MUSE/MUSE+ 在全部配置下优于 GRAPE 和 M3Care；缺失率越高，MUSE+ 的优势通常越明显。
 
