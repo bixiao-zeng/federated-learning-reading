@@ -80,7 +80,7 @@ $$
 - 模态并不是患者节点的普通输入，而是边属性：
 
 $$
-e_{u_pv_m}^{(0)}=\operatorname{Encoder}_m(x_m^{(p)}).
+e_{u_pv_m}^{(0)}=\mathrm{Encoder}_m(x_m^{(p)}).
 $$
 
 模态节点初始化为对应模态的 one-hot 向量，患者节点初始化为全一向量。这样，模态缺失直接表现为边不存在，不需要补零或为每种模态组合建立独立网络。
@@ -90,11 +90,11 @@ $$
 模型使用两层、支持 edge attributes 的 GraphSAGE。一般形式为：
 
 $$
-h_i^{(l)}=\operatorname{Aggregate}^{(l)}
+h_i^{(l)}=\mathrm{Aggregate}^{(l)}
 \left(
 h_i^{(l-1)},
 \left\{
-\operatorname{Message}^{(l)}
+\mathrm{Message}^{(l)}
 (h_j^{(l-1)},h_i^{(l-1)},e_{ji}^{(l-1)})
 \right\}_{j\in\mathcal N(i)}
 \right).
@@ -103,7 +103,7 @@ $$
 图上的多跳传播使患者能够经由共享模态节点间接交换信息，也使模态节点聚合不同患者对该模态的观测。最终取得患者节点矩阵
 
 $$
-Z=\operatorname{GNN}(G)\in\mathbb R^{N\times d}.
+Z=\mathrm{GNN}(G)\in\mathbb R^{N\times d}.
 $$
 
 ### 3. 结构级数据增强
@@ -111,7 +111,7 @@ $$
 从原图 $G$ 随机删除部分患者—模态边，得到增强图 $G'$。两张图表示同一批患者，但模态可用集合不同：
 
 $$
-Z'=\operatorname{GNN}(G').
+Z'=\mathrm{GNN}(G').
 $$
 
 原图和增强图共享同一个 GNN，即 Siamese encoder。edge dropout 与 feature dropout 的差别很重要：前者删除完整模态关系，后者只破坏模态内部特征，不能真实模拟整模态不可得。
@@ -141,7 +141,7 @@ $$
 分类头为：
 
 $$
-\hat Y=\operatorname{MLP}(Z),
+\hat Y=\mathrm{MLP}(Z),
 $$
 
 并只对有标签患者计算交叉熵：
@@ -149,7 +149,7 @@ $$
 $$
 \mathcal L_{\text{CE}}
 =\sum_{p=1}^{N}\mathbf 1(L[p]=1)
-\operatorname{CE}(\hat y_p,y_p).
+\mathrm{CE}(\hat y_p,y_p).
 $$
 
 总目标是三项损失的加权和：
